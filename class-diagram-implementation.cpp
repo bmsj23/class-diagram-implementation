@@ -170,7 +170,7 @@ public:
              << left << setw(35) << "Name" 
              << left << setw(10) << "Price" 
              << left << setw(10) << "Quantity" << endl;
-        cout << string(67, '-') << endl; // Separator line
+        cout << string(67, '-') << endl;
     }
 
     void displayCart(Product &product) {
@@ -192,7 +192,7 @@ public:
     void checkoutOption(Product &product, Order &order) {
         string name, address;
         cout << "Enter your name: ";
-        cin.ignore(); // To clear the input buffer
+        cin.ignore();
         getline(cin, name);
         cout << "Enter your address: ";
         getline(cin, address);
