@@ -14,15 +14,15 @@ private:
         string name;
         string address;
         double totalPrice;
-        string productIDs[100];   // Store product IDs
-        string products[100];     // Store product names
-        double prices[100];       // Store corresponding prices
-        int quantities[100];      // Store corresponding quantities
-        int productCount;         // Count of products in the order
+        string productIDs[100];
+        string products[100];
+        double prices[100];
+        int quantities[100];
+        int productCount;
     };
 
-    OrderDetail orders[100]; // Array to store multiple orders
-    int orderCount; // Number of orders placed
+    OrderDetail orders[100];
+    int orderCount;
 
 public:
     Order() : orderCount(0) {}
@@ -35,8 +35,8 @@ void setOrderDetails(string name, string address, double price, string product[]
 
     for (int i = 0; i < productCount; ++i) {
         orders[orderCount].products[i] = product[i];
-        orders[orderCount].productIDs[i] = productIDs[i];    // Store product IDs
-        orders[orderCount].prices[i] = productPrices[i];      // Store product prices
+        orders[orderCount].productIDs[i] = productIDs[i];
+        orders[orderCount].prices[i] = productPrices[i];
         orders[orderCount].quantities[i] = quantity[i];
     }
 
@@ -51,7 +51,7 @@ void setOrderDetails(string name, string address, double price, string product[]
 }
 
     string placeOrder() {
-        return "\nOrder placed for " + to_string(orderQty) + " item(s) at a total price of " + to_string(orderPrice);
+        return "\nCheckout for " + to_string(orderQty) + " item(s) successful!";
     }
 
     void displayOrders() {
@@ -183,6 +183,7 @@ public:
 
         while (addProdsInCart == 'Y')
         {
+            //system("cls");
             cout << endl
                  << "Enter the ID of the product you want to add to the shopping cart: ";
             cin >> productIDChosen;
@@ -256,8 +257,7 @@ public:
             {
                 cout << "Invalid product ID! Please try again." << endl;
             }
-            else
-            {   
+
                 do
                 {
                     cout << "Do you want to add another product to the shopping cart? (Y/N): ";
@@ -273,14 +273,21 @@ public:
                     }
 
                 } while (addProdsInCart != 'Y' && addProdsInCart != 'N');
-            }
-            cout << string(57, '-') << endl
+
+            if (addProdsInCart== 'Y'){
+            system("cls");
+        
+            cout << endl << string(57, '-') << endl
             << "                        Products" << endl
             << string(57, '-');
 
             displayProductHeader();
             displayProducts();
+            }
+
         }
+        cout << endl << "Returning to Main Menu." << endl;
+        system("pause");
     }
 
     int getNumOfProdInCart()
@@ -352,7 +359,7 @@ public:
 
     void displayProductHeader()
     {
-        cout << endl
+        cout
              << left << setw(12) << "Product ID"
              << left << setw(35) << "Name"
              << left << setw(10) << "Price"
@@ -393,12 +400,13 @@ void displayCart(Product &product, Order &order) {
     int numOfProdInCart = product.getNumOfProdInCart();
 
     if (numOfProdInCart == 0) {
-        cout << endl << "\t\t No product(s) in cart!" << endl << endl;
-        system("pause");  // Pause after displaying the empty cart message
+        cout << endl << "\t\t           No product(s) in cart!" << endl << endl;
+        cout << "Returning to Main Menu." << endl;
+        system("pause");
         return;
     }
     else{
-
+    cout << endl;
     displayProductHeader();
 
     for (int i = 0; i < numOfProdInCart; i++) {
@@ -495,6 +503,7 @@ void checkoutOption(Product &product, Order &order) {
     cout << endl;
 
     cout << endl << "Total price for your order: " << fixed << setprecision(2) << totalPrice << endl << endl;
+    cout << "Returning to Main Menu." << endl;
 
     // Increment order ID after a successful checkout
     orderID++;
@@ -533,15 +542,20 @@ int main()
         cout << "4 - Exit" << endl;
         cout << string(25, '-') << endl;
 
+        do{
+
         cout << "Enter choice: ";
         cin >> choice;
 
         if (choice < 1 || choice > 4)
         {
-            cout << "Invalid choice. Please enter a number between 1 and 4. Press any key to continue. ";
+            cout << "Invalid choice. Please enter a number between 1 and 4.";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
+
+        }while(choice < 1 || choice > 4);
+
         switch (choice)
         {
         case 1:
@@ -569,9 +583,13 @@ int main()
             }
             else
             {
+                 cout << string(67, '-') << endl
+                 << "                           Checkout" << endl
+                 << string(67, '-') << endl;
                 cout << "No Orders yet!" << endl
                      << endl;
             }
+            cout << endl << "Returning to Main Menu" << endl;
             system("pause");
             break;
         case 4:
