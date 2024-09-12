@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <limits>
 using namespace std;
 
 class Order {
@@ -75,7 +76,7 @@ public:
         if (index >= 0 && index < productCount) {
             cout << left << setw(12) << products[index][0]
                  << left << setw(35) << products[index][1]
-                 << left << setw(10) << products[index][2] << endl;
+                 << left << setw(10) << fixed << setprecision(2) << stod(products[index][2]) << endl;
         } else {
             cout << "Product not found!" << endl;
         }
@@ -89,83 +90,106 @@ public:
     }
 
 void addToCart() {
-    int counter = numOfProdInCart;
     char addProdsInCart;
-    char choice;
-
+    
     do {
-        // Initial prompt if no products in cart
-        if (counter == 0) {
-            do {
-                cout << endl << "Do you want to add products to your shopping cart? (Y/N): ";
-                cin >> addProdsInCart;
-                addProdsInCart = toupper(addProdsInCart);
+        cout << endl << "Do you want to add products to your shopping cart? (Y/N): ";
+        cin >> addProdsInCart;
 
-                // Check if the input is valid
-                if (addProdsInCart != 'Y' && addProdsInCart != 'N') {
-                    cout << "Invalid input. Please enter 'Y' or 'N' only." << endl;
-                }
-            } while (addProdsInCart != 'Y' && addProdsInCart != 'N');
+        // Check if the input is exactly one character
+        if (toupper(addProdsInCart) != 'Y' && toupper(addProdsInCart) != 'N') {
+            cout << "Invalid input. Please enter 'Y' or 'N' only." << endl;
+            cin.clear(); // Clear the error state
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+            addProdsInCart = ' '; // Reset to force re-prompt
+        } else {
+            addProdsInCart = toupper(addProdsInCart); // Convert to uppercase
+        }
+        
+    } while (addProdsInCart != 'Y' && addProdsInCart != 'N');
+
+    // If the user chooses to add products, proceed
+    while (addProdsInCart == 'Y') {
+        // Display products and ask for product ID
+        cout << endl << "Enter the ID of the product you want to add to the shopping cart: ";
+        cin >> productIDChosen;
+
+        // Convert the entered product ID to uppercase for case-insensitive comparison
+        for (int i = 0; i < productIDChosen.length(); i++) {
+            productIDChosen[i] = toupper(productIDChosen[i]);
         }
 
-        // If the user chooses to add products to the cart
-        if (addProdsInCart == 'Y') {
-            do {
-                cout << endl << "Enter the ID of the product you want to add to the shopping cart: ";
-                cin >> productIDChosen;
+        validProductID = false;
+        // Check if the product ID exists
+        for (int i = 0; i < productCount; i++) {
+            if (products[i][0] == productIDChosen) {
+                cout << "Selected Product: " << endl;
+                displayProductHeader();
+                cout << left << setw(12) << products[i][0]
+                     << left << setw(35) << products[i][1]
+                     << left << setw(10) << products[i][2] << endl;
+                cout << string(57, '-') << endl;
 
-                // Convert the entered product ID to uppercase for case-insensitive comparison
-                for (int i = 0; i < productIDChosen.length(); i++) {
-                    productIDChosen[i] = toupper(productIDChosen[i]);
-                }
-
-                validProductID = false;
-                // Check if the product ID exists
-                for (int i = 0; i < productCount; i++) {
-                    if (products[i][0] == productIDChosen) {
-                        cout << "Selected Product: " << endl;
-                        displayProductHeader();
-                        cout << left << setw(12) << products[i][0]
-                             << left << setw(35) << products[i][1]
-                             << left << setw(10) << products[i][2] << endl;
-                        cout << string(57, '-') << endl;
-
-                        productInCart[counter] = products[i][0];
-
-                        cout << "Enter quantity: ";
-                        cin >> productQtyListed[counter];
-
-                        cout << endl << "Product added to cart successfully!" << endl << endl;
-                        validProductID = true;
-                        counter++;
-                        numOfProdInCart = counter;
+                bool productExists = false;
+                for (int j = 0; j < numOfProdInCart; j++) {
+                    if (productInCart[j] == products[i][0]) {
+                        productQtyListed[j] += 1;
+                        productExists = true;
                         break;
                     }
                 }
 
-                // If the product ID is invalid, prompt the user to try again
-                if (!validProductID) {
-                    cout << "Invalid product ID! Please try again." << endl;
-                }
-            } while (!validProductID);  // Loop until a valid product ID is entered
+                if (!productExists) {
+                    productInCart[numOfProdInCart] = products[i][0];
 
-            // Ask if the user wants to add another product to the cart
-            do {
-                cout << "Do you want to add another product to the shopping cart? (Y/N): ";
-                cin >> choice;
-                choice = toupper(choice);
+                    // Input validation for quantity
+                    int quantity;
+                    while (true) {
+                        cout << "Enter quantity (1-100): ";
+                        cin >> quantity;
 
-                // Check if the input is valid
-                if (choice != 'Y' && choice != 'N') {
-                    cout << "Invalid input. Please enter 'Y' or 'N' only." << endl;
+                        // Check if the input is valid
+                        if (quantity < 1 || quantity > 100) {
+                            cout << "Invalid quantity! Please enter a number between 1 and 100." << endl;
+                            cin.clear(); // Clear the error state
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+                        } else {
+                            productQtyListed[numOfProdInCart] = quantity; // Store the valid quantity
+                            break; // Exit the loop if input is valid
+                        }
+                    }
+
+                    numOfProdInCart++;
+                    cout << endl << "Product added to cart successfully!" << endl << endl;
                 }
-            } while (choice != 'Y' && choice != 'N');
-        } else {
-            break;  // Exit the loop if the user does not want to add products
+
+                validProductID = true;
+                break;
+            }
         }
 
-    } while (choice != 'N');  // Continue the loop if the user wants to add another product
+        // If the product ID is invalid, prompt the user to try again
+        if (!validProductID) {
+            cout << "Invalid product ID! Please try again." << endl;
+        } else {
+do {
+        cout << "Do you want to add another product to the shopping cart? (Y/N): ";
+        cin >> addProdsInCart;
+        addProdsInCart = toupper(addProdsInCart);
+        
+        // Input validation
+        if (addProdsInCart != 'Y' && addProdsInCart != 'N') {
+            cout << endl << "Invalid input. Please enter 'Y' or 'N' only." << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+    } while (addProdsInCart != 'Y' && addProdsInCart != 'N');
+            
+        }
+    }
 }
+
 
 
     int getNumOfProdInCart() {
@@ -188,6 +212,14 @@ void addToCart() {
             }
         }
         return 0.0;
+    }
+
+    void clearCart() {
+        for (int i = 0; i < numOfProdInCart; i++) {
+            productInCart[i] = "";
+            productQtyListed[i] = 0;
+        }
+        numOfProdInCart = 0;
     }
 
     string getProductIDFromCart(int index) {
@@ -221,12 +253,13 @@ public:
 
 
     void displayCart(Product &product) {
-        totalPrice = 0; // Reset totalPrice to 0
+        totalPrice = 0;
 
         int numOfProdInCart = product.getNumOfProdInCart();
         
         if (numOfProdInCart == 0) {
-            cout << endl << "No product(s) in cart!" << endl;
+            cout << endl << "No product(s) in cart!" << endl << endl;
+            system("pause");
             return;
         }
 
@@ -234,14 +267,15 @@ public:
 
         for (int i = 0; i < numOfProdInCart; i++) {
             cout << left << setw(12) << product.getProductIDFromCart(i) 
-                << left << setw(10) << product.getPriceOfProdInCart(i) 
-                << left << setw(10) << product.getProductQtyFromCart(i) << endl;
+                 << left << setw(30) << product. getNameOfProdInCart(i)
+                 << left << setw(10) << fixed << setprecision(2) << product.getPriceOfProdInCart(i) 
+                 << left << setw(10) << product.getProductQtyFromCart(i) << endl;
 
             totalPrice += product.getPriceOfProdInCart(i) * product.getProductQtyFromCart(i);
         }
 
         cout << string(67, '-') << endl;
-        cout << endl << "Total: " << totalPrice << endl;
+        cout << "Total: " << totalPrice << endl << endl;
 
         askCheckout(product);
     }
@@ -252,49 +286,79 @@ public:
         int numOfProdInCart = product.getNumOfProdInCart();
 
         if (numOfProdInCart > 0) {
+        do {
             cout << "Do you want to checkout all the products? (Y/N): ";
             cin >> choice;
 
+            // Convert to uppercase to handle both 'y' and 'Y'
+            choice = toupper(choice);
+
+            // Validate input
+            if (choice != 'Y' && choice != 'N') {
+                cout << endl << "Invalid input. Please enter 'Y' or 'N' only." << endl << endl;
+                cin.clear(); // Clear the error state
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+
+        } while (choice != 'Y' && choice != 'N');
+        
             if (toupper(choice) == 'Y') {
+                system("cls");
                 Order order;
                 checkoutOption(product, order);
+                system("pause");
             }
         } else {
-            cout << "No product(s) in cart! Cannot proceed to checkout." << endl;
+            cout << "No product(s) in cart! Cannot proceed to checkout." << endl << endl;
+            system("pause");
         }
     }
 
-    void checkoutOption(Product &product, Order &order) {
-        int numOfProdInCart = product.getNumOfProdInCart();
-        if (numOfProdInCart == 0) {
-            cout << "No product(s) in cart! Cannot checkout." << endl;
-            return;
-        }
-
-        string name, address;
-
-        displayCheckoutProducts(product);
-
-        cout << "Total: " << getTotalPrice() << endl << endl;
-        cout << string(67, '-') << endl;
-
-        cout << "Please enter your information needed for checkout" << endl << endl;
-        cout << "Enter your name: ";
-        cin.ignore();
-        getline(cin, name);
-        cout << "Enter your address: ";
-        getline(cin, address);
-
-        for (int i = 0; i < numOfProdInCart; i++) {
-            order.setOrderDetails(name, address, product.getProductQtyFromCart(i), product.getPriceOfProdInCart(i));
-            cout << order.placeOrder() << " for product: " << product.getNameOfProdInCart(i) << endl;
-        }
-        cout << "Total price for your order: " << getTotalPrice() << endl;
-
+        void clearCart() {
         totalPrice = 0;
     }
 
+void checkoutOption(Product &product, Order &order) {
+    int numOfProdInCart = product.getNumOfProdInCart();
+    if (numOfProdInCart == 0) {
+        cout << endl << "No product(s) in cart! Cannot checkout." << endl << endl;
+        return;
+    }
+
+    string name, address;
+
+    displayCheckoutProducts(product);
+
+    // Calculate the total price before displaying it
+    totalPrice = 0; // Reset total price for this checkout
+    for (int i = 0; i < numOfProdInCart; i++) {
+        totalPrice += product.getPriceOfProdInCart(i) * product.getProductQtyFromCart(i);
+    }
+
+    cout << "Total: " << totalPrice << endl;
+
+    cout << endl << "Please enter your information needed for checkout" << endl << endl;
+    cout << "Enter your Name: ";
+    cin.ignore();
+    getline(cin, name);
+    cout << "Enter your Address: ";
+    getline(cin, address);
+
+    for (int i = 0; i < numOfProdInCart; i++) {
+        order.setOrderDetails(name, address, product.getProductQtyFromCart(i), product.getPriceOfProdInCart(i));
+        cout << fixed << setprecision(2) << order.placeOrder() << " for product: " << product.getNameOfProdInCart(i) << endl;
+    }
+    cout << endl << "Total price for your order: " << fixed << setprecision(2) << endl << endl;
+
+    product.clearCart(); 
+
+    totalPrice = 0; // Reset totalPrice after checkout
+}
+
+
     void displayCheckoutProducts(Product &product) {
+
+        cout << string(67, '-') << endl << "                          Checkout" << endl << string(67, '-');
         displayProductHeader();
         int numOfProdInCart = product.getNumOfProdInCart();
         for (int i = 0; i < numOfProdInCart; i++) {
@@ -318,6 +382,7 @@ int main() {
     Order order;
 
     do {
+        system("cls");
         cout << string(25, '-') << endl;
         cout << "        Main Menu" << endl;
         cout << string(25, '-') << endl;
@@ -329,26 +394,30 @@ int main() {
 
         cout << "Enter choice: ";
         cin >> choice;
-
+    
+        if (choice < 1 || choice > 4) {
+            cout << "Invalid choice. Please enter a number between 1 and 4." << endl;
+            cin.clear(); // Clear the error state
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+        } 
         switch (choice) {
             case 1:
+                system("cls");
                 cout << string(57, '-') << endl << "                        Products" << endl << string(57, '-');
                 product.displayProductHeader();
                 product.displayProducts();
                 product.addToCart();
                 break;
             case 2:
-
-                if (product.getNumOfProdInCart() > 0){
-
-                    cout << string(67, '-') << endl << "                     Shopping Cart" << endl  << string(67, '-');
-                }
-
+                system("cls");
+                cout << string(67, '-') << endl << "                    Shopping Cart" << endl << string(67, '-');
                 cart.displayCart(product);
                 break;
             case 3:
-                cout << string(67, '-') << endl << "                          Checkout" << endl << string(67, '-');
+                system("cls");
+                //cout << string(67, '-') << endl << "                          Checkout" << endl << string(67, '-');
                 cart.checkoutOption(product, order);
+                system("pause");
                 break;
             case 4:
                 cout << endl << "Thank you!" << endl;
